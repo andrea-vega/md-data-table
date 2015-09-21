@@ -1,5 +1,5 @@
 {
-  "name": "angular-material-data-table-infinite-scroll",
+  "name": "md-data-table-infinite-scroll",
   "version": "0.8.11",
   "description": "Material Design data table with infinite scroll.",
   "main": [
