@@ -1,6 +1,6 @@
 angular.module('md.data.table').directive('mdSelectAll', mdSelectAll);
 
-function mdSelectAll() {
+function mdSelectAll($timeout) {
   'use strict';
   
   function template(tElement) {
@@ -19,18 +19,26 @@ function mdSelectAll() {
     var count = 0;
     
     var getSelectableItems = function() {
-      return scope.items.filter(function (item) {
-        return !tableCtrl.isDisabled(item);
+      // WORKAROUND md-virtual-repeat has items nested on the object
+      var items = scope.items.items || scope.items;
+      return items.filter(function () {
+        // TODO add support for disabled rows
+        //return !tableCtrl.isDisabled(item);
+        return true;
       });
     };
-    
-    tableCtrl.isReady.body.promise.then(function () {
+
+    $timeout(function () {
       scope.mdClasses = tableCtrl.classes;
       
       scope.getCount = function() {
-        return (count = scope.items.reduce(function(sum, item) {
-          return tableCtrl.isDisabled(item) ? sum : ++sum;
-        }, 0));
+        // TODO add support for disabled rows
+        var items = scope.items.items || scope.items;
+        count = items.length;
+        return count;
+        //return (count = items.reduce(function(sum, item) {
+        //  return tableCtrl.isDisabled(item) ? sum : ++sum;
+        //}, 0));
       };
       
       scope.allSelected = function () {
@@ -38,9 +46,10 @@ function mdSelectAll() {
       };
       
       scope.toggleAll = function () {
-        var selectableItems = getSelectableItems(scope.items);
-        
-        if(selectableItems.length === tableCtrl.selectedItems.length) {
+        var items = scope.items.items || scope.items;
+        var selectableItems = getSelectableItems(items);
+
+        if(items.length === tableCtrl.selectedItems.length) {
           tableCtrl.selectedItems.splice(0);
         } else {
           tableCtrl.selectedItems = selectableItems;
@@ -58,3 +67,5 @@ function mdSelectAll() {
     template: template
   };
 }
+
+mdSelectAll.$inject = ['$timeout'];
