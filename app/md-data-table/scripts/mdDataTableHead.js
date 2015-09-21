@@ -8,10 +8,15 @@ function mdTableHead($mdTable, $q) {
     
     // enable row selection
     if(tElement.parent().attr('md-row-select')) {
-      var ngRepeat = tElement.parent().find('tbody').find('tr').attr('ng-repeat');
-      
+      var ngRepeat = tElement.attr('md-virtual-items');
+
+      if (!ngRepeat) {
+        var rowElement = tElement.parent().find('tbody').find('tr');
+        ngRepeat = rowElement.attr('ng-repeat') || rowElement.attr('md-virtual-repeat');
+      }
+
       if(ngRepeat) {
-        tElement.find('tr').prepend(angular.element('<th md-select-all="' + $mdTable.parse(ngRepeat).items + '"></th>'));
+        tElement.find('tr').prepend(angular.element('<th md-select-all="' + ngRepeat + '"></th>'));
       }
     }
     

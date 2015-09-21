@@ -6,20 +6,6 @@ function mdDataTable() {
   function compile(tElement, tAttrs) {
     var head = tElement.find('thead');
     var foot = tElement.find('tfoot');
-    
-    // make sure the table has a head element
-    if(!head.length) {
-      head = tElement.find('tbody').eq(0);
-      
-      if(head.children().find('th').length) {
-        head.replaceWith('<thead>' + head.html() + '</thead>');
-      } else {
-        throw new Error('mdDataTable', 'Expecting <thead></thead> element.');
-      }
-      
-      head = tElement.find('thead');
-    }
-    
     var rows = tElement.find('tbody').find('tr');
     
     head.attr('md-table-head', '');
@@ -33,17 +19,9 @@ function mdDataTable() {
         foot.find('tr').prepend('<td></td>');
       }
     }
-    
-    if(tAttrs.mdRowSelect && rows.attr('ng-repeat')) {
+
+    if(tAttrs.mdRowSelect && (rows.attr('ng-repeat') || rows.attr('md-virtual-repeat'))) {
       rows.attr('md-select-row', '');
-    }
-    
-    if(tAttrs.mdRowSelect && !rows.attr('ng-repeat')) {
-      console.warn('Please use ngRepeat to enable row selection.');
-    }
-    
-    if(head.attr('md-order') && !rows.attr('ng-repeat')) {
-      console.warn('Column ordering without ngRepeat is not supported.');
     }
   }
   

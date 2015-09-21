@@ -35,7 +35,7 @@ function mdTableRow($mdTable, $timeout) {
       if(scope.$last) {
         tableCtrl.isReady.body.resolve($mdTable.parse(attrs.ngRepeat));
       }
-    } else if(tableCtrl.isLastChild(element.parent().children(), element[0])) {
+    } else if(tableCtrl.isLastChild(element.parent().children(), element[0]) || attrs.mdVirtualRepeat) {
       tableCtrl.isReady.body.resolve();
     }
     
