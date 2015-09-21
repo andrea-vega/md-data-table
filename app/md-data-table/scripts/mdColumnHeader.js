@@ -65,8 +65,8 @@ function mdColumnHeader($compile, $interpolate, $timeout) {
     
     if(headCtrl.isSignificant(element.parent())) {
       tableCtrl.setColumn(attrs);
-      
-      if(attrs.ngRepeat) {
+
+      if(attrs.ngRepeat || attrs.mdVirtualRepeat) {
         if(scope.$parent.$last) {
           tableCtrl.isReady.head.resolve();
         }

@@ -67,8 +67,8 @@ function mdColumnHeader($compile, $interpolate, $timeout) {
     
     if(headCtrl.isSignificant(element.parent())) {
       tableCtrl.setColumn(attrs);
-      
-      if(attrs.ngRepeat) {
+
+      if(attrs.ngRepeat || attrs.mdVirtualRepeat) {
         if(scope.$parent.$last) {
           tableCtrl.isReady.head.resolve();
         }
@@ -99,20 +99,6 @@ function mdDataTable() {
   function compile(tElement, tAttrs) {
     var head = tElement.find('thead');
     var foot = tElement.find('tfoot');
-    
-    // make sure the table has a head element
-    if(!head.length) {
-      head = tElement.find('tbody').eq(0);
-      
-      if(head.children().find('th').length) {
-        head.replaceWith('<thead>' + head.html() + '</thead>');
-      } else {
-        throw new Error('mdDataTable', 'Expecting <thead></thead> element.');
-      }
-      
-      head = tElement.find('thead');
-    }
-    
     var rows = tElement.find('tbody').find('tr');
     
     head.attr('md-table-head', '');
@@ -126,17 +112,9 @@ function mdDataTable() {
         foot.find('tr').prepend('<td></td>');
       }
     }
-    
-    if(tAttrs.mdRowSelect && rows.attr('ng-repeat')) {
+
+    if(tAttrs.mdRowSelect && (rows.attr('ng-repeat') || rows.attr('md-virtual-repeat'))) {
       rows.attr('md-select-row', '');
-    }
-    
-    if(tAttrs.mdRowSelect && !rows.attr('ng-repeat')) {
-      console.warn('Please use ngRepeat to enable row selection.');
-    }
-    
-    if(head.attr('md-order') && !rows.attr('ng-repeat')) {
-      console.warn('Column ordering without ngRepeat is not supported.');
     }
   }
   
@@ -302,10 +280,15 @@ function mdTableHead($mdTable, $q) {
     
     // enable row selection
     if(tElement.parent().attr('md-row-select')) {
-      var ngRepeat = tElement.parent().find('tbody').find('tr').attr('ng-repeat');
-      
+      var ngRepeat = tElement.attr('md-virtual-items');
+
+      if (!ngRepeat) {
+        var rowElement = tElement.parent().find('tbody').find('tr');
+        ngRepeat = rowElement.attr('ng-repeat') || rowElement.attr('md-virtual-repeat');
+      }
+
       if(ngRepeat) {
-        tElement.find('tr').prepend(angular.element('<th md-select-all="' + $mdTable.parse(ngRepeat).items + '"></th>'));
+        tElement.find('tr').prepend(angular.element('<th md-select-all="' + ngRepeat + '"></th>'));
       }
     }
     
@@ -562,7 +545,7 @@ function mdTableRow($mdTable, $timeout) {
       if(scope.$last) {
         tableCtrl.isReady.body.resolve($mdTable.parse(attrs.ngRepeat));
       }
-    } else if(tableCtrl.isLastChild(element.parent().children(), element[0])) {
+    } else if(tableCtrl.isLastChild(element.parent().children(), element[0]) || attrs.mdVirtualRepeat) {
       tableCtrl.isReady.body.resolve();
     }
     
@@ -645,7 +628,7 @@ function mdTableService() {
 
 angular.module('md.data.table').directive('mdSelectAll', mdSelectAll);
 
-function mdSelectAll() {
+function mdSelectAll($timeout) {
   'use strict';
   
   function template(tElement) {
@@ -664,18 +647,26 @@ function mdSelectAll() {
     var count = 0;
     
     var getSelectableItems = function() {
-      return scope.items.filter(function (item) {
-        return !tableCtrl.isDisabled(item);
+      // WORKAROUND md-virtual-repeat has items nested on the object
+      var items = scope.items.items || scope.items;
+      return items.filter(function () {
+        // TODO add support for disabled rows
+        //return !tableCtrl.isDisabled(item);
+        return true;
       });
     };
-    
-    tableCtrl.isReady.body.promise.then(function () {
+
+    $timeout(function () {
       scope.mdClasses = tableCtrl.classes;
       
       scope.getCount = function() {
-        return (count = scope.items.reduce(function(sum, item) {
-          return tableCtrl.isDisabled(item) ? sum : ++sum;
-        }, 0));
+        // TODO add support for disabled rows
+        var items = scope.items.items || scope.items;
+        count = items.length;
+        return count;
+        //return (count = items.reduce(function(sum, item) {
+        //  return tableCtrl.isDisabled(item) ? sum : ++sum;
+        //}, 0));
       };
       
       scope.allSelected = function () {
@@ -683,9 +674,10 @@ function mdSelectAll() {
       };
       
       scope.toggleAll = function () {
-        var selectableItems = getSelectableItems(scope.items);
-        
-        if(selectableItems.length === tableCtrl.selectedItems.length) {
+        var items = scope.items.items || scope.items;
+        var selectableItems = getSelectableItems(items);
+
+        if(items.length === tableCtrl.selectedItems.length) {
           tableCtrl.selectedItems.splice(0);
         } else {
           tableCtrl.selectedItems = selectableItems;
@@ -704,6 +696,7 @@ function mdSelectAll() {
   };
 }
 
+mdSelectAll.$inject = ['$timeout'];
 
 angular.module('md.data.table').directive('mdSelectRow', mdSelectRow);
 
@@ -711,7 +704,7 @@ function mdSelectRow($mdTable) {
   'use strict';
   
   function template(tElement, tAttrs) {
-    var ngRepeat = $mdTable.parse(tAttrs.ngRepeat);
+    var ngRepeat = $mdTable.parse(tAttrs.ngRepeat || tAttrs.mdVirtualRepeat);
     var checkbox = angular.element('<md-checkbox></md-checkbox>');
     
     checkbox.attr('aria-label', 'Select Row');
@@ -734,7 +727,7 @@ function mdSelectRow($mdTable) {
   
   function postLink(scope, element, attrs, tableCtrl) {
     var model = {};
-    var ngRepeat = $mdTable.parse(attrs.ngRepeat);
+    var ngRepeat = $mdTable.parse(attrs.ngRepeat || attrs.mdVirtualRepeat);
     
     if(!angular.isFunction(scope.isDisabled)) {
       scope.isDisabled = function () { return false; };

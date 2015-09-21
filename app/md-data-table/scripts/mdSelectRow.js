@@ -4,7 +4,7 @@ function mdSelectRow($mdTable) {
   'use strict';
   
   function template(tElement, tAttrs) {
-    var ngRepeat = $mdTable.parse(tAttrs.ngRepeat);
+    var ngRepeat = $mdTable.parse(tAttrs.ngRepeat || tAttrs.mdVirtualRepeat);
     var checkbox = angular.element('<md-checkbox></md-checkbox>');
     
     checkbox.attr('aria-label', 'Select Row');
@@ -27,7 +27,7 @@ function mdSelectRow($mdTable) {
   
   function postLink(scope, element, attrs, tableCtrl) {
     var model = {};
-    var ngRepeat = $mdTable.parse(attrs.ngRepeat);
+    var ngRepeat = $mdTable.parse(attrs.ngRepeat || attrs.mdVirtualRepeat);
     
     if(!angular.isFunction(scope.isDisabled)) {
       scope.isDisabled = function () { return false; };
