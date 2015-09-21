@@ -1,24 +1,27 @@
 {
-  "name": "angular-material-data-table",
+  "name": "angular-material-data-table-infinite-scroll",
   "version": "0.8.11",
-  "description": "Material Design data table.",
+  "description": "Material Design data table with infinite scroll.",
   "main": [
     "dist/md-data-table.min.js",
     "dist/md-data-table.min.css"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/daniel-nagy/md-data-table.git"
+    "url": "git://github.com/daniel81bcn/md-data-table.git"
   },
   "authors": [
-    "Daniel Nagy"
+    { "name": "Daniel Nagy" },
+    { "name": "Daniel Mañá" }
   ],
-  "homepage": "http://danielnagy.me/md-data-table",
   "license": "MIT",
   "keywords": [
     "material",
     "table",
-    "md-data-table"
+    "md-data-table",
+    "md-virtual-repeat",
+    "infinite",
+    "scroll"
   ],
   "ignore": [
     "**/.*",

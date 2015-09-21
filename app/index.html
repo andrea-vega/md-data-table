@@ -19,14 +19,42 @@
     
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <div class="md-title">Material Design Data Table</div>
+        <div class="md-title">Material Design Data Table with infinite scroll</div>
       </div>
     </md-toolbar>
-    
-    <md-content laout="column" flex>
-      <md-card ng-include="'templates/nutrition-table.html'" ng-controller="nutritionController">
-    </md-content>
-    
+
+    demo not implemented yet, see example commented in code
+
+    <!-- it works having header and body by separate: -->
+    <!-- table header (it has to be separated if we use infinite scrolling) -->
+    <!--<md-data-table-container>-->
+      <!--<table md-data-table md-row-select="vm.selected" md-progress="vm.deferred" class="md-primary" style="padding-right: 16px;">-->
+        <!--<thead md-order="vm.query.sortCol" md-trigger="vm.submitQuery" md-virtual-items="vm.infiniteItems">-->
+        <!--<tr>-->
+          <!--<th style="width: 100%;" name="Host" order-by="host"></th>-->
+          <!--<th style="min-width: 100px;" numeric name="Num events" order-by="seen"></th>-->
+          <!--<th style="min-width: 140px;" numeric name="Last seen" order-by="lastseen"></th>-->
+        <!--</tr>-->
+        <!--</thead>-->
+      <!--</table>-->
+    <!--</md-data-table-container>-->
+
+    <!--&lt;!&ndash; table body (using md-virtual-repeat for infinite scrolling) &ndash;&gt;-->
+    <!--<md-data-table-container flex layout="column">-->
+      <!--<md-virtual-repeat-container flex>-->
+        <!--<table md-data-table md-row-select="vm.selected" class="md-primary">-->
+          <!--<tbody>-->
+          <!--<tr md-auto-select md-virtual-repeat="item in vm.infiniteItems" md-on-demand>-->
+            <!--<td style="width: 100%;">{{item.host}}</td>-->
+            <!--<td style="min-width: 100px;" class="numeric">{{item.seen}}</td>-->
+            <!--<td style="min-width: 140px;" class="numeric">{{item.lastseen}}</td>-->
+          <!--</tr>-->
+          <!--</tbody>-->
+        <!--</table>-->
+      <!--</md-virtual-repeat-container>-->
+    <!--</md-data-table-container>-->
+
+
     <script type="text/javascript" src="angular/angular.min.js"></script>
     <script type="text/javascript" src="angular-animate/angular-animate.min.js"></script>
     <script type="text/javascript" src="angular-aria/angular-aria.min.js"></script>
