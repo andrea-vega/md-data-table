@@ -5,23 +5,25 @@ function mdTableHead($mdTable, $q) {
 
   function compile(tElement) {
     tElement.find('th').attr('md-column-header', '');
-    
+
     // enable row selection
     if(tElement.parent().attr('md-row-select')) {
-      var ngRepeat = tElement.attr('md-virtual-items');
+      var mdVirtualItems = tElement.attr('md-virtual-items');
+      if (mdVirtualItems) {
 
-      if (!ngRepeat) {
+        // using md-virtual-items for infinite scroll
+        tElement.find('tr').prepend(angular.element('<th md-select-all="' + mdVirtualItems + '"></th>'));
+      } else {
+
+        // using ng-repeat
         var rowElement = tElement.parent().find('tbody').find('tr');
-        ngRepeat = rowElement.attr('ng-repeat') || rowElement.attr('md-virtual-repeat');
-      }
-
-      if(ngRepeat) {
-        tElement.find('tr').prepend(angular.element('<th md-select-all="' + ngRepeat + '"></th>'));
+        var ngRepeat = rowElement.attr('ng-repeat');
+        tElement.find('tr').prepend(angular.element('<th md-select-all="' + $mdTable.parse(ngRepeat).items + '"></th>'));
       }
     }
-    
+
     tElement.after('<thead md-table-progress></thead>');
-    
+
     return postLink;
   }
   
