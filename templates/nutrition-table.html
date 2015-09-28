@@ -1,58 +1,31 @@
-<md-data-table-toolbar ng-hide="selected.length || filter.show">
+<md-data-table-toolbar ng-show="!selected.length">
   <h2 class="md-title">Nutrition</h2>
-  <div flex></div>
-  <md-button class="md-icon-button" ng-click="filter.show = true">
-    <i class="material-icons md-dark">filter_list</i>
-  </md-button>
-  <md-button class="md-icon-button" ng-click="addItem($event)">
-    <i class="material-icons md-dark">local_dining</i>
-  </md-button>
 </md-data-table-toolbar>
 
-<md-data-table-toolbar ng-show="filter.show && !selected.length">
-  <i class="material-icons md-dark">search</i>
-  <form flex name="filter.form">
-    <input type="text" ng-model="query.filter" ng-model-options="filter.options" placeholder="search">
-  </form>
-  <md-button class="md-icon-button" ng-click="removeFilter()">
-    <i class="material-icons md-dark">close</i>
-  </md-button>
-</md-data-table-toolbar>
-
-<md-data-table-toolbar class="alternate" ng-show="selected.length" layout-align="space-between">
+<md-data-table-toolbar class="alternate" ng-show="selected.length">
   <div>{{selected.length}} {{selected.length > 1 ? 'items' : 'item'}} selected</div>
-  <md-button class="md-icon-button" ng-click="delete($event)">
-    <i class="material-icons md-dark">delete</i>
-  </md-button>
 </md-data-table-toolbar>
 
+<!-- table header (it has to be separated if we use infinite scrolling) -->
 <md-data-table-container>
-  <table md-data-table md-row-select="selected" md-progress="deferred" class="md-primary">
-    <thead md-order="query.order" md-trigger="onChange">
-      <tr>
-        <th name="Dessert" unit="100g serving" order-by="nameToLower"></th>
-        <th numeric name="Calories" order-by="calories.value"></th>
-        <th numeric name="Fat" unit="g"></th>
-        <th numeric name="Carbs" unit="g"></th>
-        <th numeric name="Protein" unit="g"></th>
-        <th numeric name="Sodium" unit="mg"></th>
-        <th numeric name="Calcium" unit="%"></th>
-        <th numeric name="Iron" unit="%"></th>
-      </tr>
+  <table md-data-table md-row-select="selected" class="md-primary" style="padding-right: 16px;">
+    <thead md-virtual-items="infiniteItems">
+    <tr>
+      <th name="Item"></th>
+    </tr>
     </thead>
-    <tbody>
-      <tr md-auto-select ng-repeat="dessert in desserts.data">
-        <td>{{dessert.name}}</td>
-        <td>{{dessert.calories.value}}</td>
-        <td>{{dessert.fat.value | number: 1}}</td>
-        <td>{{dessert.carbs.value}}</td>
-        <td>{{dessert.protein.value | number: 1}}</td>
-        <td>{{dessert.sodium.value}}</td>
-        <td show-unit>{{dessert.calcium.value}}</td>
-        <td show-unit>{{dessert.iron.value}}</td>
-      </tr>
-    </tbody>
   </table>
 </md-data-table-container>
 
-<md-data-table-pagination md-limit="query.limit" md-page="query.page" md-total="{{desserts.count}}" md-trigger="onChange"></md-data-table-pagination>
+<!-- table body (using md-virtual-repeat for infinite scrolling) -->
+<md-data-table-container flex layout="column">
+  <md-virtual-repeat-container flex>
+    <table md-data-table md-row-select="selected" class="md-primary">
+      <tbody>
+      <tr md-auto-select md-virtual-repeat="item in infiniteItems" md-on-demand>
+        <td>{{item}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </md-virtual-repeat-container>
+</md-data-table-container>
