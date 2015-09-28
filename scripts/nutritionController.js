@@ -1,80 +1,40 @@
-angular.module('nutritionApp').controller('nutritionController', ['$mdDialog', '$nutrition', '$scope', function ($mdDialog, $nutrition, $scope) {
+angular.module('nutritionApp').controller('nutritionController', ['$http', '$q', '$timeout', '$scope', function ($http, $q, $timeout, $scope) {
   'use strict';
-  
-  var bookmark;
-  
-  $scope.selected = [];
-  
-  $scope.filter = {
-    options: {
-      debounce: 500
+
+  // See https://material.angularjs.org/latest/#/demo/material.components.virtualRepeat
+
+  // In this example, we set up our model using a plain object.
+  // Using a class works too. All that matters is that we implement
+  // getItemAtIndex and getLength.
+  $scope.infiniteItems = {
+    numLoaded_: 0,
+    toLoad_: 0,
+    // Required.
+    getItemAtIndex: function (index) {
+      if (index > this.numLoaded_) {
+        this.fetchMoreItems_(index);
+        return null;
+      }
+      return index;
+    },
+    // Required.
+    // For infinite scroll behavior, we always return a slightly higher
+    // number than the previously loaded items.
+    getLength: function () {
+      return this.numLoaded_ + 5;
+    },
+    fetchMoreItems_: function (index) {
+      // For demo purposes, we simulate loading more items with a timed
+      // promise. In real code, this function would likely contain an
+      // $http request.
+      if (this.toLoad_ < index) {
+        this.toLoad_ += 20;
+        $timeout(angular.noop, 300).then(angular.bind(this, function () {
+          this.numLoaded_ = this.toLoad_;
+        }));
+      }
     }
   };
 
-  $scope.query = {
-    filter: '',
-    limit: '5',
-    order: 'nameToLower',
-    page: 1
-  };
-  
-  function success(desserts) {
-    $scope.desserts = desserts;
-  }
-  
-  $scope.onChange = function () {
-    return $nutrition.desserts.get($scope.query, success).$promise;
-  };
-  
-  function getDesserts() {
-    $scope.deferred = $scope.onChange();
-  }
-  
-  $scope.addItem = function (event) {
-    $mdDialog.show({
-      clickOutsideToClose: true,
-      controller: 'addItemController',
-      controllerAs: 'ctrl',
-      focusOnOpen: false,
-      targetEvent: event,
-      templateUrl: 'templates/add-item-dialog.html',
-    }).then(getDesserts);
-  };
-  
-  $scope.delete = function (event) {
-    $mdDialog.show({
-      clickOutsideToClose: true,
-      controller: 'deleteController',
-      controllerAs: 'ctrl',
-      focusOnOpen: false,
-      targetEvent: event,
-      locals: { desserts: $scope.selected },
-      templateUrl: 'templates/delete-dialog.html',
-    }).then(getDesserts);
-  };
-  
-  $scope.removeFilter = function () {
-    $scope.filter.show = false;
-    $scope.query.filter = '';
-    
-    if($scope.filter.form.$dirty) {
-      $scope.filter.form.$setPristine();
-    }
-  };
-  
-  $scope.$watch('query.filter', function (newValue, oldValue) {
-    if(!oldValue) {
-      bookmark = $scope.query.page;
-    }
-    
-    if(newValue !== oldValue) {
-      $scope.query.page = 1;
-    }
-    
-    if(!newValue) {
-      $scope.query.page = bookmark;
-    }
-    
-    getDesserts();
-  });
+  $scope.selected = [];
 }]);
