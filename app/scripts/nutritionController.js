@@ -1,103 +1,40 @@
 angular.module('nutritionApp').controller('nutritionController', ['$http', '$q', '$timeout', '$scope', function ($http, $q, $timeout, $scope) {
   'use strict';
-  
+
+  // See https://material.angularjs.org/latest/#/demo/material.components.virtualRepeat
+
+  // In this example, we set up our model using a plain object.
+  // Using a class works too. All that matters is that we implement
+  // getItemAtIndex and getLength.
+  $scope.infiniteItems = {
+    numLoaded_: 0,
+    toLoad_: 0,
+    // Required.
+    getItemAtIndex: function (index) {
+      if (index > this.numLoaded_) {
+        this.fetchMoreItems_(index);
+        return null;
+      }
+      return index;
+    },
+    // Required.
+    // For infinite scroll behavior, we always return a slightly higher
+    // number than the previously loaded items.
+    getLength: function () {
+      return this.numLoaded_ + 5;
+    },
+    fetchMoreItems_: function (index) {
+      // For demo purposes, we simulate loading more items with a timed
+      // promise. In real code, this function would likely contain an
+      // $http request.
+      if (this.toLoad_ < index) {
+        this.toLoad_ += 20;
+        $timeout(angular.noop, 300).then(angular.bind(this, function () {
+          this.numLoaded_ = this.toLoad_;
+        }));
+      }
+    }
+  };
+
   $scope.selected = [];
-  
-  $scope.query = {
-    order: 'name',
-    limit: 5,
-    page: 1
-  };
-  
-  $scope.columns = [{
-    name: 'Dessert',
-    orderBy: 'name',
-    unit: '100g serving'
-  }, {
-    descendFirst: true,
-    name: 'Type',
-    orderBy: 'type'
-  }, {
-    name: 'Calories',
-    numeric: true,
-    orderBy: 'calories.value'
-  }, {
-    name: 'Fat',
-    numeric: true,
-    orderBy: 'fat.value',
-    unit: 'g'
-  }, {
-    name: 'Carbs',
-    numeric: true,
-    orderBy: 'carbs.value',
-    unit: 'g'
-  }, {
-    name: 'Protein',
-    numeric: true,
-    orderBy: 'protein.value',
-    trim: true,
-    unit: 'g'
-  }, {
-    name: 'Sodium',
-    numeric: true,
-    orderBy: 'sodium.value',
-    unit: 'mg'
-  }, {
-    name: 'Calcium',
-    numeric: true,
-    orderBy: 'calcium.value',
-    unit: '%'
-  }, {
-    name: 'Iron',
-    numeric: true,
-    orderBy: 'iron.value',
-    unit: '%'
-  }];
-  
-  $http.get('desserts.js').then(function (desserts) {
-    $scope.desserts = desserts.data;
-  });
-  
-  $scope.getTypes = function () {
-    return ['Candy', 'Ice cream', 'Other', 'Pastry'];
-  };
-  
-  $scope.onpagechange = function(page, limit) {
-    
-    console.log('Scope Page: ' + $scope.query.page + ' Scope Limit: ' + $scope.query.limit);
-    console.log('Page: ' + page + ' Limit: ' + limit);
-    
-    var deferred = $q.defer();
-    
-    $timeout(function () {
-      deferred.resolve();
-    }, 2000);
-    
-    return deferred.promise;
-  };
-  
-  $scope.loadStuff = function () {
-    var deferred = $q.defer();
-    
-    $timeout(function () {
-      deferred.reject();
-    }, 2000);
-    
-    $scope.deferred = deferred.promise;
-  };
-  
-  $scope.onorderchange = function(order) {
-    
-    console.log('Scope Order: ' + $scope.query.order);
-    console.log('Order: ' + order);
-    
-    var deferred = $q.defer();
-    
-    $timeout(function () {
-      deferred.resolve();
-    }, 2000);
-    
-    return deferred.promise;
-  };
-  
 }]);
